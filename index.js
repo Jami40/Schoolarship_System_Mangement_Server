@@ -25,8 +25,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const database=client.db("schoolarshipDb")
     const schoolarshipCollection=database.collection("schoolarship")
     const usersCollection=database.collection("users")
@@ -430,8 +429,8 @@ async function run() {
     });
     
     
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
    
     // await client.close();
@@ -444,7 +443,7 @@ run().catch(console.dir);
 app.get('/', (req, res) => {
   res.send('Scholarship management server is running');
 });
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+module.exports = app;
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+// });
