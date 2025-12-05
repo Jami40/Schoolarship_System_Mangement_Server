@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const port=process.env.PORT || 3000;
 
 
@@ -270,9 +271,7 @@ async function run() {
     app.post('/applications', async (req, res) => {
       try {
         const application = req.body;
-        application.status = 'pending'; // Default status
         application.createdAt = new Date();
-        application.application_feedback = '';
         
         const result = await applicationsCollection.insertOne(application);
         res.send(result);
@@ -285,7 +284,7 @@ async function run() {
     app.get('/applications/user/:email', async (req, res) => {
       try {
         const email = req.params.email;
-        const query = { user_email: email };
+        const query = { userEmail: email };
         const applications = await applicationsCollection.find(query).toArray();
         res.send(applications);
       } catch (error) {
@@ -405,6 +404,28 @@ async function run() {
         res.send(result);
       } catch (error) {
         res.status(500).send({ message: 'Error deleting review', error });
+      }
+    });
+
+    // ========== STRIPE PAYMENT ENDPOINTS ==========
+    
+    // Create payment intent
+    app.post('/create-payment-intent', async (req, res) => {
+      try {
+        const { amount } = req.body;
+        
+        // Create a PaymentIntent with the order amount and currency
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(amount * 100), // Stripe expects amount in cents
+          currency: 'usd',
+          payment_method_types: ['card'],
+        });
+
+        res.send({
+          clientSecret: paymentIntent.client_secret,
+        });
+      } catch (error) {
+        res.status(500).send({ message: 'Error creating payment intent', error: error.message });
       }
     });
     
