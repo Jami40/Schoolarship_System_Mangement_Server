@@ -177,6 +177,17 @@ async function run() {
         res.status(500).send({ message: 'Error updating user role', error });
       }
     });
+
+    // Delete user (admin only)
+    app.delete('/users/:email', async (req, res) => {
+      try {
+        const email = req.params.email;
+        const result = await usersCollection.deleteOne({ email: email });
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: 'Error deleting user', error });
+      }
+    });
     
     // ========== SCHOLARSHIP ENDPOINTS ==========
     
@@ -209,6 +220,47 @@ async function run() {
         res.send(scholarship);
       } catch (error) {
         res.status(500).send({ message: 'Error fetching scholarship', error });
+      }
+    });
+    
+    // Create new scholarship
+    app.post('/scholarships', async (req, res) => {
+      try {
+        const scholarship = req.body;
+        scholarship.createdAt = new Date();
+        
+        const result = await schoolarshipCollection.insertOne(scholarship);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: 'Error creating scholarship', error });
+      }
+    });
+    
+    // Update scholarship
+    app.patch('/scholarships/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updateData = req.body;
+        const query = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: updateData
+        };
+        const result = await schoolarshipCollection.updateOne(query, updateDoc);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: 'Error updating scholarship', error });
+      }
+    });
+    
+    // Delete scholarship
+    app.delete('/scholarships/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await schoolarshipCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: 'Error deleting scholarship', error });
       }
     });
     
